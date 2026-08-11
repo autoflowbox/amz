@@ -1,0 +1,29 @@
+Update một số phần sau:
+Bổ xung ô search order: Nhập order ID vào => tìm ra order ID đó.
+Phần Profit
+Giá bán x 80% được bao nhiêu, trừ đi giá Cost và phí ship = Profit
+hãy kiểm tra lại công thức này đã áp dụng đúng chưa
+(Giá bán x 80%) - phí ship - giá cost = Profit
+Ở phần shipdate, khi bấm vào sort có thể lọc theo cái nào quá hạn/ sắp đến hạn/ ..... Quá hạn đặt lên trên
+Status thì tôi muốn thêm Option |Đã gửi|, thay "Đã ship" thành "DONE", 
+vẫn giữ option "Hiện đơn đã ship" nhưng đổi thành "Hiện đơn HOÀN THÀNH"
+
+Hiện tại thì tôi phải bấm  vào ô nó ko mở ra ngay, 
+mà phải bấm đúng vào vị trí có nội dung nó mới mở ra, hãy cho phép bấm 2 lần vào ô đó là sẽ mở ô
+À trong Tab "Đơn hàng" show một dòng phía trên ghi:
+Bạn có ... đơn hàng chờ xử lý (số đơn hàng chờ ship) để biết khối lượng công việc cần xử lý
+
+Ô Quantity và file attached nhỏ lại chút vì nó ko chứa nhiều chữ, highlight lên nếu số lượng >1 hoặc order có 2 sản phẩm.
+
+Thêm một cột là Print, có nút bấm cho phép in 1 tem sản phẩm, kích thước dọc 100x150, nội dung gồm:
+
+Tên shop - Order ID
+SKU = Tên sản phẩm (tên sản phẩm được diễn giải ra)
+
+Address: 
+
+
+
+
+Dòng cuối mặc định để riêng:
+Đơn hàng gửi từ AutoFlow Team - ĐT: 0774.388.999

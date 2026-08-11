@@ -1,19 +1,31 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useOrders } from '../../hooks/useOrders'
 import { useShops } from '../../hooks/useShops'
 import { useProductDefinitions } from '../../hooks/useProductDefinitions'
-import { computeDashboardStats } from '../../lib/dashboardQueries'
+import { computeDashboardStats, getMonthStartStr, getTodayStr } from '../../lib/dashboardQueries'
 import { StatCards } from './StatCards'
 import { RankingBarChart } from './RankingBarChart'
+
+type Scope = 'all' | 'shop'
 
 export function Dashboard() {
   const { data: orders = [], isLoading } = useOrders()
   const { data: shops = [] } = useShops()
   const { data: definitions = [] } = useProductDefinitions()
 
+  const [from, setFrom] = useState(getMonthStartStr)
+  const [to, setTo] = useState(getTodayStr)
+  const [scope, setScope] = useState<Scope>('all')
+  const [shopId, setShopId] = useState<string>('')
+
   const stats = useMemo(
-    () => computeDashboardStats(orders, definitions, shops),
-    [orders, definitions, shops],
+    () =>
+      computeDashboardStats(orders, definitions, shops, {
+        from: from || null,
+        to: to || null,
+        shopId: scope === 'shop' ? shopId || null : null,
+      }),
+    [orders, definitions, shops, from, to, scope, shopId],
   )
 
   if (isLoading) {
@@ -22,18 +34,62 @@ export function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
-      <StatCards
-        ordersThisMonth={stats.ordersThisMonth}
-        revenueThisMonth={stats.revenueThisMonth}
-        profitThisMonth={stats.profitThisMonth}
-      />
+      <div className="flex items-center gap-3 flex-wrap rounded-xl border border-white/10 bg-neutral-900 px-4 py-3">
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm text-white/50">Từ ngày</label>
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="rounded-md border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm text-white/50">Đến ngày</label>
+          <input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="rounded-md border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 ml-2">
+          <label className="text-sm text-white/50">Của</label>
+          <select
+            value={scope}
+            onChange={(e) => setScope(e.target.value as Scope)}
+            className="rounded-md border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+          >
+            <option value="all">Toàn bộ</option>
+            <option value="shop">Từng shop</option>
+          </select>
+          {scope === 'shop' && (
+            <select
+              value={shopId}
+              onChange={(e) => setShopId(e.target.value)}
+              className="rounded-md border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+            >
+              <option value="">— chọn shop —</option>
+              {shops.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      <StatCards orderCount={stats.orderCount} revenue={stats.revenue} profit={stats.profit} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-xl border border-white/10 bg-neutral-900 p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Top 10 SKU bán chạy nhất</h2>
+          <h2 className="text-sm font-semibold text-white mb-4">SKU bán chạy nhất (toàn bộ)</h2>
           <RankingBarChart
-            data={stats.topSkus.map((s) => ({ label: s.skuCode, value: s.quantity }))}
+            data={stats.topSkus.map((s) => ({ label: `${s.sku} — ${s.productName}`, value: s.quantity }))}
             valueLabel="Số lượng"
+            labelWidth={280}
           />
         </div>
 

@@ -1,4 +1,4 @@
-export type OrderStatus = 'Chờ ship' | 'Đã gửi' | 'DONE' | 'Lưu ý'
+export type OrderStatus = '' | 'Chờ ship' | 'Chờ in' | 'Đã gửi' | 'Lưu ý' | 'DONE' | 'Hủy đơn'
 
 export interface Shop {
   id: string

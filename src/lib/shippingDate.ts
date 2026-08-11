@@ -1,6 +1,12 @@
-import { differenceInCalendarDays, parseISO } from 'date-fns'
+import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 
 export type ShippingUrgency = 'none' | 'default' | 'yellow' | 'orange' | 'overdue'
+
+/** Displays a "YYYY-MM-DD" date value as "DD/MM/YYYY". */
+export function formatDateDMY(shippingDate: string | null): string {
+  if (!shippingDate) return '—'
+  return format(parseISO(shippingDate), 'dd/MM/yyyy')
+}
 
 export interface ShippingDateInfo {
   daysLeft: number | null

@@ -30,3 +30,6 @@ dist-ssr
 
 # Claude Code local config
 .claude/
+
+# Personal notes/docs, not part of the app
+Prompt3.docx

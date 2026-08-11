@@ -5,13 +5,13 @@ export function QuantityCell({ items }: { items: OrderItem[] }) {
   const highlight = sorted.some((item) => item.quantity > 1) || sorted.length >= 2
 
   if (sorted.length === 0) {
-    return <div className="w-full h-full min-h-[28px] px-1 py-1 text-sm text-white/25">—</div>
+    return <div className="w-full h-full min-h-[28px] px-1 py-1 text-xs text-white/25">—</div>
   }
 
   return (
     <div
-      className={`w-full h-full min-h-[28px] px-1 py-1 text-sm ${
-        highlight ? 'bg-amber-500/15 text-amber-300 font-medium' : ''
+      className={`w-full h-full min-h-[28px] px-1 py-1 text-xs text-center ${
+        highlight ? 'bg-amber-500/15 text-amber-300 font-semibold' : ''
       }`}
     >
       {sorted.map((item) => (

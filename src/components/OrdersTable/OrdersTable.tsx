@@ -15,11 +15,13 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable'
-import type { Order } from '../../types'
+import type { Order, OrderStatus } from '../../types'
 import { useOrders, useCreateOrder, useUpdateOrder, useUpdateOrderStatus, useDeleteOrder, useReplaceOrderItems } from '../../hooks/useOrders'
+import type { OrderPatch } from '../../hooks/useOrders'
 import { useShops } from '../../hooks/useShops'
 import { useProductDefinitions } from '../../hooks/useProductDefinitions'
 import { EditableCell } from './EditableCell'
+import { OrderIdCell } from './OrderIdCell'
 import { ShopCell } from './ShopCell'
 import { SkuCell } from './SkuCell'
 import { QuantityCell } from './QuantityCell'
@@ -27,12 +29,33 @@ import { AddressCell } from './AddressCell'
 import { ProfitCell } from './ProfitCell'
 import { ShippingDateCell } from './ShippingDateCell'
 import { StatusBadge } from './StatusBadge'
+import { AssigneeCell } from './AssigneeCell'
 import { FileAttachCell } from './FileAttachCell'
 import { PrintCell } from './PrintCell'
 import { ColumnVisibilityMenu } from './ColumnVisibilityMenu'
 import { DraggableColumnHeader } from './DraggableColumnHeader'
 import { ProductDefinitionsModal } from './ProductDefinitionsModal'
 import { getShippingDateInfo, urgencyRank, type ShippingUrgency } from '../../lib/shippingDate'
+
+/**
+ * Row sort priority when grouped "Theo Status" — lower sorts first. 'Lưu ý' (needs attention)
+ * floats to the very top; DONE/Hủy đơn only show at all when "Hiện đơn HOÀN THÀNH" is checked, so
+ * they're ranked last among themselves.
+ */
+const STATUS_RANK: Record<OrderStatus, number> = {
+  'Lưu ý': 0,
+  'Đã gửi': 1,
+  'Chờ in': 2,
+  'Chờ ship': 3,
+  '': 4,
+  DONE: 5,
+  'Hủy đơn': 6,
+}
+
+/** Once an order has any real data, it leaves the blank "no status yet" state and becomes "Chờ ship". */
+function withAutoActivate(order: Order, patch: OrderPatch): OrderPatch {
+  return order.status === '' ? { ...patch, status: 'Chờ ship' } : patch
+}
 
 const DEFAULT_COLUMN_ORDER = [
   'shop', 'order_id', 'sku', 'quantity', 'address', 'note',
@@ -133,21 +156,32 @@ export function OrdersTable() {
     [orders],
   )
 
+  const assigneeOptions = useMemo(() => {
+    const names = new Set<string>()
+    orders.forEach((o) => {
+      if (o.assignee.trim()) names.add(o.assignee.trim())
+    })
+    return [...names].sort((a, b) => a.localeCompare(b))
+  }, [orders])
+
   const filteredOrders = useMemo(() => {
     const query = search.trim().toLowerCase()
     const filtered = orders.filter((o) => {
-      if (!showShipped && o.status === 'DONE') return false
+      if (!showShipped && (o.status === 'DONE' || o.status === 'Hủy đơn')) return false
       if (shopFilter !== 'all' && o.shop_id !== shopFilter) return false
       if (query && !orderMatchesSearch(o, query)) return false
       const urgency = getShippingDateInfo(o.shipping_date).urgency
       if (shipDateFilter !== 'all' && urgency !== shipDateFilter) return false
       return true
     })
-    return filtered.sort(
-      (a, b) =>
+    return filtered.sort((a, b) => {
+      const statusDiff = STATUS_RANK[a.status] - STATUS_RANK[b.status]
+      if (statusDiff !== 0) return statusDiff
+      return (
         urgencyRank[getShippingDateInfo(a.shipping_date).urgency] -
-        urgencyRank[getShippingDateInfo(b.shipping_date).urgency],
-    )
+        urgencyRank[getShippingDateInfo(b.shipping_date).urgency]
+      )
+    })
   }, [orders, showShipped, shopFilter, search, shipDateFilter])
 
   const columns = useMemo<ColumnDef<Order>[]>(
@@ -159,7 +193,9 @@ export function OrdersTable() {
           <ShopCell
             shopId={row.original.shop_id}
             shops={shops}
-            onChange={(shopId) => updateOrder.mutate({ id: row.original.id, patch: { shop_id: shopId } })}
+            onChange={(shopId) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { shop_id: shopId }) })
+            }
           />
         ),
       },
@@ -167,10 +203,12 @@ export function OrdersTable() {
         id: 'order_id',
         header: COLUMN_LABELS.order_id,
         cell: ({ row }) => (
-          <EditableCell
+          <OrderIdCell
             value={row.original.order_id}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { order_id: v } })}
-            placeholder="Order ID"
+            items={row.original.order_items ?? []}
+            onSave={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { order_id: v }) })
+            }
           />
         ),
       },
@@ -181,14 +219,34 @@ export function OrdersTable() {
           <SkuCell
             items={row.original.order_items ?? []}
             definitions={definitions}
-            onSave={(lines) => replaceItems.mutate({ orderId: row.original.id, items: lines })}
+            orderId={row.original.order_id}
+            address={row.original.address}
+            shippingDate={row.original.shipping_date}
+            onSave={(lines) => {
+              replaceItems.mutate({ orderId: row.original.id, items: lines })
+              if (lines.length > 0 && row.original.status === '') {
+                updateOrder.mutate({ id: row.original.id, patch: { status: 'Chờ ship' } })
+              }
+            }}
+            onSaveOrderId={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { order_id: v }) })
+            }
+            onSaveAddress={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { address: v }) })
+            }
+            onSaveShippingDate={(v) =>
+              updateOrder.mutate({
+                id: row.original.id,
+                patch: withAutoActivate(row.original, { shipping_date: v || null }),
+              })
+            }
           />
         ),
       },
       {
         id: 'quantity',
         header: COLUMN_LABELS.quantity,
-        size: 64,
+        size: 40,
         cell: ({ row }) => <QuantityCell items={row.original.order_items ?? []} />,
       },
       {
@@ -197,7 +255,9 @@ export function OrdersTable() {
         cell: ({ row }) => (
           <AddressCell
             address={row.original.address}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { address: v } })}
+            onSave={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { address: v }) })
+            }
           />
         ),
       },
@@ -207,7 +267,9 @@ export function OrdersTable() {
         cell: ({ row }) => (
           <EditableCell
             value={row.original.note}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { note: v } })}
+            onSave={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { note: v }) })
+            }
             type="textarea"
             placeholder="Ghi chú"
           />
@@ -219,7 +281,12 @@ export function OrdersTable() {
         cell: ({ row }) => (
           <EditableCell
             value={row.original.price}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { price: Number(v) || 0 } })}
+            onSave={(v) =>
+              updateOrder.mutate({
+                id: row.original.id,
+                patch: withAutoActivate(row.original, { price: Number(v) || 0 }),
+              })
+            }
             type="number"
             placeholder="0.00"
           />
@@ -228,6 +295,7 @@ export function OrdersTable() {
       {
         id: 'profit',
         header: COLUMN_LABELS.profit,
+        size: 76,
         cell: ({ row }) => (
           <ProfitCell
             price={row.original.price}
@@ -242,14 +310,19 @@ export function OrdersTable() {
         cell: ({ row }) => (
           <ShippingDateCell
             shippingDate={row.original.shipping_date}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { shipping_date: v || null } })}
+            onSave={(v) =>
+              updateOrder.mutate({
+                id: row.original.id,
+                patch: withAutoActivate(row.original, { shipping_date: v || null }),
+              })
+            }
           />
         ),
       },
       {
         id: 'file_attached',
         header: COLUMN_LABELS.file_attached,
-        size: 84,
+        size: 60,
         cell: ({ row }) => (
           <FileAttachCell orderId={row.original.id} files={row.original.order_files ?? []} />
         ),
@@ -268,23 +341,25 @@ export function OrdersTable() {
         id: 'assignee',
         header: COLUMN_LABELS.assignee,
         cell: ({ row }) => (
-          <EditableCell
+          <AssigneeCell
             value={row.original.assignee}
-            onSave={(v) => updateOrder.mutate({ id: row.original.id, patch: { assignee: v } })}
-            placeholder="Người làm đơn"
+            options={assigneeOptions}
+            onChange={(v) =>
+              updateOrder.mutate({ id: row.original.id, patch: withAutoActivate(row.original, { assignee: v }) })
+            }
           />
         ),
       },
       {
         id: 'print',
         header: COLUMN_LABELS.print,
-        size: 96,
+        size: 110,
         cell: ({ row }) => (
           <PrintCell order={row.original} shops={shops} definitions={definitions} />
         ),
       },
     ],
-    [shops, definitions, updateOrder, updateStatus, replaceItems],
+    [shops, definitions, assigneeOptions, updateOrder, updateStatus, replaceItems],
   )
 
   const table = useReactTable({
@@ -370,7 +445,10 @@ export function OrdersTable() {
             ))}
           </select>
 
-          <label className="flex items-center gap-1.5 text-sm text-white/70 px-1">
+          <label
+            className="flex items-center gap-1.5 text-sm text-white/70 px-1"
+            title="Mặc định ẩn các đơn ở trạng thái DONE và Hủy đơn"
+          >
             <input
               type="checkbox"
               checked={showShipped}
@@ -394,8 +472,14 @@ export function OrdersTable() {
         />
       </div>
 
-      <div className="px-6 py-2 border-b border-white/10 bg-blue-500/10 text-sm text-blue-200">
-        Bạn có <span className="font-semibold">{pendingCount}</span> đơn hàng chờ xử lý (số đơn hàng chờ ship)
+      <div
+        className={`px-6 py-2.5 border-b text-sm font-medium ${
+          pendingCount > 0
+            ? 'border-blue-400/40 bg-blue-500/25 text-blue-100 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.3)]'
+            : 'border-white/10 bg-blue-500/10 text-blue-200'
+        }`}
+      >
+        Bạn có <span className="font-bold text-base text-white">{pendingCount}</span> đơn hàng chờ xử lý (số đơn hàng chờ ship)
       </div>
 
       <div className="flex-1 overflow-auto">
@@ -428,7 +512,14 @@ export function OrdersTable() {
                 >
                   <td className="px-1.5 py-1 text-sm text-white/40 align-top">{index + 1}</td>
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="align-top border-l border-white/5">
+                    <td
+                      key={cell.id}
+                      className={`align-top border-l ${
+                        cell.column.id === 'sku'
+                          ? 'bg-blue-500/[0.06] border-blue-500/20'
+                          : 'border-white/5'
+                      }`}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -452,6 +543,19 @@ export function OrdersTable() {
                   </td>
                 </tr>
               )}
+              <tr>
+                <td className="px-1.5 py-1.5 align-top">
+                  <button
+                    onClick={() => createOrder.mutate()}
+                    disabled={createOrder.isPending}
+                    className="flex items-center justify-center w-6 h-6 rounded-md border border-blue-500/50 bg-blue-500/15 text-blue-300 hover:text-white hover:border-blue-500 hover:bg-blue-500/30 disabled:opacity-50 text-sm font-bold shadow-[0_0_0_1px_rgba(59,130,246,0.15)]"
+                    title="Thêm đơn hàng mới"
+                  >
+                    +
+                  </button>
+                </td>
+                <td colSpan={columns.length + 1} />
+              </tr>
             </tbody>
           </table>
         )}

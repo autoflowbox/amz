@@ -31,7 +31,7 @@ create table if not exists public.orders (
   price numeric not null default 0,
   shipping_date date,
   note text not null default '',
-  status text not null default 'Chờ ship' check (status in ('Chờ ship', 'Đã gửi', 'DONE', 'Lưu ý')),
+  status text not null default '' check (status in ('', 'Chờ ship', 'Chờ in', 'Đã gửi', 'Lưu ý', 'DONE', 'Hủy đơn')),
   assignee text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -58,9 +58,13 @@ create table if not exists public.order_files (
 -- Migration: 'Đã ship' status renamed to 'DONE', 'Đã gửi' added as an in-between step.
 -- Safe to re-run against an existing database that still has the old check constraint.
 update public.orders set status = 'DONE' where status = 'Đã ship';
+
+-- Migration: added 'Chờ in' and 'Hủy đơn' statuses, and allow '' (no status yet, shown for
+-- brand-new orders until they get their first bit of real data).
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders add constraint orders_status_check
-  check (status in ('Chờ ship', 'Đã gửi', 'DONE', 'Lưu ý'));
+  check (status in ('', 'Chờ ship', 'Chờ in', 'Đã gửi', 'Lưu ý', 'DONE', 'Hủy đơn'));
+alter table public.orders alter column status set default '';
 
 create index if not exists orders_shop_id_idx on public.orders(shop_id);
 create index if not exists orders_status_idx on public.orders(status);

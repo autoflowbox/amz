@@ -1,18 +1,18 @@
 import { formatCurrency } from '../../lib/profit'
 
 export function StatCards({
-  ordersThisMonth,
-  revenueThisMonth,
-  profitThisMonth,
+  orderCount,
+  revenue,
+  profit,
 }: {
-  ordersThisMonth: number
-  revenueThisMonth: number
-  profitThisMonth: number
+  orderCount: number
+  revenue: number
+  profit: number
 }) {
   const cards = [
-    { label: 'Đơn hàng tháng này', value: String(ordersThisMonth) },
-    { label: 'Doanh thu tháng này', value: formatCurrency(revenueThisMonth) },
-    { label: 'Lợi nhuận tháng này', value: formatCurrency(profitThisMonth) },
+    { label: 'Số đơn hàng', value: String(orderCount) },
+    { label: 'Doanh thu', value: formatCurrency(revenue) },
+    { label: 'Lợi nhuận', value: formatCurrency(profit) },
   ]
 
   return (

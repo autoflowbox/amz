@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { getShippingDateInfo, urgencyClasses } from '../../lib/shippingDate'
+import { useRef, useState } from 'react'
+import { formatDateDMY, getShippingDateInfo, urgencyClasses } from '../../lib/shippingDate'
 
 export function ShippingDateCell({
   shippingDate,
@@ -9,14 +9,30 @@ export function ShippingDateCell({
   onSave: (value: string) => void
 }) {
   const [editing, setEditing] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const info = getShippingDateInfo(shippingDate)
 
   if (editing) {
     return (
       <input
+        ref={(el) => {
+          inputRef.current = el
+          if (el) {
+            el.focus()
+            // Opens the native calendar picker right away instead of just showing a caret.
+            try {
+              el.showPicker?.()
+            } catch {
+              // showPicker isn't supported everywhere — the field still works via manual click.
+            }
+          }
+        }}
         type="date"
-        autoFocus
         defaultValue={shippingDate ?? ''}
+        onChange={(e) => {
+          setEditing(false)
+          if (e.target.value !== (shippingDate ?? '')) onSave(e.target.value)
+        }}
         onBlur={(e) => {
           setEditing(false)
           if (e.target.value !== (shippingDate ?? '')) onSave(e.target.value)
@@ -29,14 +45,14 @@ export function ShippingDateCell({
 
   return (
     <div
-      onDoubleClick={() => setEditing(true)}
-      className="w-full h-full min-h-[28px] px-1.5 py-1 text-sm cursor-text flex items-center"
-      title="Nhấp đúp để sửa"
+      onClick={() => setEditing(true)}
+      className="w-full h-full min-h-[28px] px-1.5 py-1 text-sm cursor-pointer flex items-center"
+      title="Nhấp để chọn ngày"
     >
       <span
         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${urgencyClasses[info.urgency]}`}
       >
-        {shippingDate ?? '—'} {info.daysLeft !== null && `· ${info.label}`}
+        {formatDateDMY(shippingDate)} {info.daysLeft !== null && `· ${info.label}`}
       </span>
     </div>
   )

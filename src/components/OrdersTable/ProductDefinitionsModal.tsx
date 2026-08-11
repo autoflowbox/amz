@@ -38,32 +38,43 @@ export function ProductDefinitionsModal({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-2xl rounded-xl border border-white/10 bg-neutral-900 p-5 shadow-2xl"
       >
-        <h3 className="text-white font-medium mb-1">Thư viện định nghĩa SKU</h3>
+        <h3 className="text-white font-medium mb-1">Thư viện SKU</h3>
         <p className="text-xs text-white/40 mb-4">
-          Mỗi mã (VD: 2xMP hoặc 2xMousePad) gắn với 1 tên sản phẩm + giá cost + phí ship. Nhiều mã
-          có thể trỏ tới cùng 1 sản phẩm.
+          Cột <span className="text-white/70">Keyword SKU</span> là các từ khóa chứa trong SKU, cách
+          nhau bởi dấu phẩy — hễ SKU của đơn hàng khớp với <em>bất kỳ</em> từ khóa nào trong đó ở bất
+          kỳ vị trí nào (không cần khớp chính xác) thì được nhận diện là sản phẩm đó. VD: 2 Mousepad |{' '}
+          <span className="text-white/70">2xMousepad, 2xMP, 2Mpad</span> — điền thêm không giới hạn số
+          từ khóa.
         </p>
+
+        <div className="grid grid-cols-[1.5fr_1fr_90px_90px_28px] gap-2 px-2.5 mb-1.5 text-xs font-semibold text-white/40 uppercase tracking-wide">
+          <span>Sản phẩm</span>
+          <span>Keyword SKU</span>
+          <span>Giá cost</span>
+          <span>Phí ship</span>
+          <span />
+        </div>
 
         <div className="max-h-72 overflow-y-auto space-y-1.5 mb-4">
           {definitions.map((def) => (
             <div
               key={def.id}
-              className="grid grid-cols-[1fr_1.5fr_90px_90px_28px] gap-2 items-center rounded border border-white/10 px-2.5 py-1.5"
+              className="grid grid-cols-[1.5fr_1fr_90px_90px_28px] gap-2 items-center rounded border border-white/10 px-2.5 py-1.5"
             >
-              <input
-                defaultValue={def.code}
-                onBlur={(e) => {
-                  const v = e.target.value.trim()
-                  if (v && v !== def.code) updateDef.mutate({ id: def.id, patch: { code: v } })
-                }}
-                className="bg-transparent text-sm text-white outline-none border-b border-transparent focus:border-blue-500"
-              />
               <input
                 defaultValue={def.product_name}
                 onBlur={(e) => {
                   const v = e.target.value.trim()
                   if (v && v !== def.product_name)
                     updateDef.mutate({ id: def.id, patch: { product_name: v } })
+                }}
+                className="bg-transparent text-sm text-white outline-none border-b border-transparent focus:border-blue-500"
+              />
+              <input
+                defaultValue={def.code}
+                onBlur={(e) => {
+                  const v = e.target.value.trim()
+                  if (v && v !== def.code) updateDef.mutate({ id: def.id, patch: { code: v } })
                 }}
                 className="bg-transparent text-sm text-white outline-none border-b border-transparent focus:border-blue-500"
               />
@@ -89,7 +100,9 @@ export function ProductDefinitionsModal({ onClose }: { onClose: () => void }) {
                 className="bg-transparent text-sm text-white outline-none border-b border-transparent focus:border-blue-500"
               />
               <button
-                onClick={() => deleteDef.mutate(def.id)}
+                onClick={() => {
+                  if (confirm(`Xóa sản phẩm "${def.product_name}"?`)) deleteDef.mutate(def.id)
+                }}
                 className="text-white/40 hover:text-red-400"
                 title="Xóa"
               >
@@ -102,17 +115,17 @@ export function ProductDefinitionsModal({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        <form onSubmit={handleAdd} className="grid grid-cols-[1fr_1.5fr_90px_90px_auto] gap-2 items-center">
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Mã (2xMP)"
-            className="rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
-          />
+        <form onSubmit={handleAdd} className="grid grid-cols-[1.5fr_1fr_90px_90px_auto] gap-2 items-center">
           <input
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             placeholder="Tên sản phẩm"
+            className="rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+          />
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Keyword SKU (VD: 2xMP, 2xMousepad, 2Mpad)"
             className="rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
           />
           <input

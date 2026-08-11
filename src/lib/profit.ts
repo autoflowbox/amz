@@ -13,7 +13,7 @@ export function computeProfit(
 ): number {
   const revenue = (price || 0) * 0.8
   const cost = (items || []).reduce((sum, item) => {
-    const def = findProductDefinition(item.sku_code, definitions)
+    const def = findProductDefinition(item.sku, definitions)
     if (!def) return sum
     return sum + item.quantity * (def.cost + def.shipping)
   }, 0)

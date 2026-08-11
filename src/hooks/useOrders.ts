@@ -24,7 +24,7 @@ export function useCreateOrder() {
     mutationFn: async (): Promise<Order> => {
       const { data, error } = await supabase
         .from('orders')
-        .insert({ status: 'Chờ ship' })
+        .insert({ status: '' })
         .select(ORDER_SELECT)
         .single()
       if (error) throw error

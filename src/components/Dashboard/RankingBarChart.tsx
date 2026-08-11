@@ -11,7 +11,15 @@ export interface RankingDatum {
   sublabel?: string
 }
 
-export function RankingBarChart({ data, valueLabel }: { data: RankingDatum[]; valueLabel: string }) {
+export function RankingBarChart({
+  data,
+  valueLabel,
+  labelWidth = 200,
+}: {
+  data: RankingDatum[]
+  valueLabel: string
+  labelWidth?: number
+}) {
   if (data.length === 0) {
     return <p className="text-sm text-white/40 py-8 text-center">Chưa có dữ liệu.</p>
   }
@@ -26,7 +34,7 @@ export function RankingBarChart({ data, valueLabel }: { data: RankingDatum[]; va
         <YAxis
           type="category"
           dataKey="label"
-          width={150}
+          width={labelWidth}
           tick={{ fill: AXIS_TEXT, fontSize: 12 }}
           axisLine={{ stroke: GRID }}
           tickLine={false}

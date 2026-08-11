@@ -14,7 +14,7 @@ export function ProfitCell({
   const color = profit >= 0 ? 'text-emerald-400' : 'text-red-400'
 
   return (
-    <div className={`w-full h-full min-h-[28px] px-1.5 py-1 text-sm font-medium ${color}`}>
+    <div className={`w-full h-full min-h-[28px] px-1 py-1 text-xs font-medium whitespace-nowrap ${color}`}>
       {formatCurrency(profit)}
     </div>
   )

@@ -18,17 +18,35 @@ function toEditRows(items: OrderItem[]): EditRow[] {
 export function SkuCell({
   items,
   definitions,
+  orderId,
+  address,
+  shippingDate,
   onSave,
+  onSaveOrderId,
+  onSaveAddress,
+  onSaveShippingDate,
 }: {
   items: OrderItem[]
   definitions: ProductDefinition[]
+  orderId: string
+  address: string
+  shippingDate: string | null
   onSave: (lines: SkuLineInput[]) => void
+  onSaveOrderId: (value: string) => void
+  onSaveAddress: (value: string) => void
+  onSaveShippingDate: (value: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [rows, setRows] = useState<EditRow[]>([])
+  const [orderIdDraft, setOrderIdDraft] = useState('')
+  const [addressDraft, setAddressDraft] = useState('')
+  const [shippingDateDraft, setShippingDateDraft] = useState('')
 
   function openEditor() {
     setRows(items.length > 0 ? toEditRows(items) : [{ key: crypto.randomUUID(), sku: '', quantity: 1 }])
+    setOrderIdDraft(orderId)
+    setAddressDraft(address)
+    setShippingDateDraft(shippingDate ?? '')
     setEditing(true)
   }
 
@@ -41,6 +59,9 @@ export function SkuCell({
         quantity: r.quantity || 1,
       }))
     onSave(lines)
+    if (orderIdDraft !== orderId) onSaveOrderId(orderIdDraft)
+    if (addressDraft !== address) onSaveAddress(addressDraft)
+    if (shippingDateDraft !== (shippingDate ?? '')) onSaveShippingDate(shippingDateDraft)
     setEditing(false)
   }
 
@@ -57,7 +78,7 @@ export function SkuCell({
           <span className="text-white/25">— chưa có SKU —</span>
         ) : (
           sorted.map((item) => {
-            const def = findProductDefinition(item.sku_code, definitions)
+            const def = findProductDefinition(item.sku, definitions)
             return (
               <div key={item.id} className="mb-1 last:mb-0">
                 <div className="text-white leading-tight">{item.sku}</div>
@@ -81,12 +102,24 @@ export function SkuCell({
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-lg rounded-xl border border-white/10 bg-neutral-900 p-5 shadow-2xl"
           >
-            <h3 className="text-white font-medium mb-3">Danh sách SKU trong đơn</h3>
+            <h3 className="text-white font-medium mb-3">Thông tin đơn hàng</h3>
 
-            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+            <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+              Order ID
+            </label>
+            <input
+              value={orderIdDraft}
+              onChange={(e) => setOrderIdDraft(e.target.value)}
+              placeholder="Order ID"
+              className="w-full mb-3 rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+            />
+
+            <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+              SKU
+            </label>
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {rows.map((row, i) => {
-                const code = parseSkuCode(row.sku)
-                const def = findProductDefinition(code, definitions)
+                const def = findProductDefinition(row.sku, definitions)
                 return (
                   <div key={row.key} className="flex items-start gap-2">
                     <div className="flex-1">
@@ -106,7 +139,7 @@ export function SkuCell({
                         ) : def ? (
                           <span className="text-white/40">{def.product_name}</span>
                         ) : (
-                          <span className="text-red-400">Chưa xác định sản phẩm (mã: {code})</span>
+                          <span className="text-red-400">Chưa xác định sản phẩm</span>
                         )}
                       </div>
                     </div>
@@ -135,10 +168,31 @@ export function SkuCell({
 
             <button
               onClick={() => setRows([...rows, { key: crypto.randomUUID(), sku: '', quantity: 1 }])}
-              className="mt-3 text-sm text-blue-400 hover:text-blue-300"
+              className="mt-2 inline-flex items-center gap-1 rounded-md border border-blue-500/50 bg-blue-500/15 px-2.5 py-1 text-sm font-medium text-blue-300 hover:border-blue-500 hover:bg-blue-500/30 hover:text-white"
             >
               + Thêm SKU
             </button>
+
+            <label className="block mt-4 text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+              Address
+            </label>
+            <textarea
+              value={addressDraft}
+              onChange={(e) => setAddressDraft(e.target.value)}
+              rows={3}
+              placeholder="Địa chỉ"
+              className="w-full rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+            />
+
+            <label className="block mt-4 text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+              Shipping Date
+            </label>
+            <input
+              type="date"
+              value={shippingDateDraft}
+              onChange={(e) => setShippingDateDraft(e.target.value)}
+              className="w-full rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+            />
 
             <div className="mt-5 flex justify-end gap-2">
               <button

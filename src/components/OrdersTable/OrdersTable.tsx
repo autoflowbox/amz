@@ -36,6 +36,7 @@ import { ColumnVisibilityMenu } from './ColumnVisibilityMenu'
 import { DraggableColumnHeader } from './DraggableColumnHeader'
 import { ProductDefinitionsModal } from './ProductDefinitionsModal'
 import { getShippingDateInfo, urgencyRank, type ShippingUrgency } from '../../lib/shippingDate'
+import { buildHpwExportText } from '../../lib/hpwExport'
 
 /**
  * Row sort priority when grouped "Theo Status" — lower sorts first. 'Lưu ý' (needs attention)
@@ -140,6 +141,38 @@ export function OrdersTable() {
   const [shipDateFilter, setShipDateFilter] = useState<ShipDateFilter>('all')
   const [search, setSearch] = useState('')
   const [showDefsModal, setShowDefsModal] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [exportCopied, setExportCopied] = useState(false)
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll(visible: Order[]) {
+    setSelectedIds((prev) => {
+      const allSelected = visible.length > 0 && visible.every((o) => prev.has(o.id))
+      const next = new Set(prev)
+      visible.forEach((o) => (allSelected ? next.delete(o.id) : next.add(o.id)))
+      return next
+    })
+  }
+
+  async function handleExportSelected() {
+    const selected = filteredOrders.filter((o) => selectedIds.has(o.id))
+    const text = buildHpwExportText(selected, shops, definitions)
+    try {
+      await navigator.clipboard.writeText(text)
+      setExportCopied(true)
+      setTimeout(() => setExportCopied(false), 1500)
+    } catch {
+      // Clipboard access can be denied by the browser — silently ignore.
+    }
+  }
 
   function persistColumnOrder(next: string[]) {
     setColumnOrder(next)
@@ -486,6 +519,33 @@ export function OrdersTable() {
         Bạn có <span className="font-bold text-base text-neutral-900">{pendingCount}</span> đơn hàng chờ xử lý (số đơn hàng chờ ship)
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-3 px-6 py-2.5 border-b border-amber-300 bg-amber-50 text-amber-900 text-sm">
+          <span>
+            Đã chọn <span className="font-bold text-base text-neutral-900">{selectedIds.size}</span> đơn hàng
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="text-xs text-neutral-600 hover:text-neutral-900 border border-neutral-300 rounded-md px-2.5 py-1 hover:bg-neutral-100 bg-white"
+            >
+              Bỏ chọn
+            </button>
+            <button
+              onClick={handleExportSelected}
+              className={`text-xs rounded-md px-2.5 py-1 whitespace-nowrap border ${
+                exportCopied
+                  ? 'text-emerald-700 border-emerald-300 bg-emerald-50'
+                  : 'text-neutral-600 hover:text-blue-600 border-neutral-300 hover:border-blue-500 bg-white'
+              }`}
+              title="Copy dữ liệu các đơn đã chọn theo định dạng HPW để dán vào file CSV template"
+            >
+              {exportCopied ? '✓ Đã copy' : '📤 Xuất file'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto bg-white">
         {isLoading ? (
           <p className="p-6 text-neutral-500 text-sm">Đang tải...</p>
@@ -495,7 +555,20 @@ export function OrdersTable() {
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <tr>
                   <th className="sticky top-0 z-10 bg-neutral-50 border-b-2 border-neutral-300 text-left px-1.5 py-2 w-12">
-                    <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">STT</span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        checked={filteredOrders.length > 0 && filteredOrders.every((o) => selectedIds.has(o.id))}
+                        ref={(el) => {
+                          if (el)
+                            el.indeterminate =
+                              selectedIds.size > 0 && !filteredOrders.every((o) => selectedIds.has(o.id))
+                        }}
+                        onChange={() => toggleSelectAll(filteredOrders)}
+                        title="Chọn tất cả"
+                      />
+                      <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">STT</span>
+                    </div>
                   </th>
                   <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                     {table.getHeaderGroups()[0].headers.map((header) => (
@@ -523,7 +596,16 @@ export function OrdersTable() {
                         row.original.status === 'Lưu ý' ? 'bg-red-50' : ''
                       }`}
                     >
-                      <td className="px-1.5 py-1 text-sm text-neutral-400 align-top border-r border-neutral-300">{index + 1}</td>
+                      <td className="px-1.5 py-1 text-sm text-neutral-400 align-top border-r border-neutral-300">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(row.original.id)}
+                            onChange={() => toggleSelect(row.original.id)}
+                          />
+                          <span>{index + 1}</span>
+                        </div>
+                      </td>
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
@@ -539,7 +621,14 @@ export function OrdersTable() {
                       <td className="px-1.5 py-1 align-top">
                         <button
                           onClick={() => {
-                            if (confirm('Xóa đơn hàng này?')) deleteOrder.mutate(row.original.id)
+                            if (confirm('Xóa đơn hàng này?')) {
+                              deleteOrder.mutate(row.original.id)
+                              setSelectedIds((prev) => {
+                                const next = new Set(prev)
+                                next.delete(row.original.id)
+                                return next
+                              })
+                            }
                           }}
                           className="text-neutral-400 hover:text-red-600 text-sm"
                           title="Xóa đơn"

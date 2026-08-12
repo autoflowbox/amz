@@ -20,10 +20,20 @@ export function useAddProductDefinition() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (input: {
+      id_tem: string
       code: string
       product_name: string
       cost: number
       shipping: number
+      weight: number
+      p_weight: number
+      length: number
+      width: number
+      height: number
+      hs_code: string
+      item_price: number
+      note1: string
+      note2: string
     }): Promise<ProductDefinition> => {
       const { data, error } = await supabase
         .from('product_definitions')
@@ -47,7 +57,25 @@ export function useUpdateProductDefinition() {
       patch,
     }: {
       id: string
-      patch: Partial<Pick<ProductDefinition, 'code' | 'product_name' | 'cost' | 'shipping'>>
+      patch: Partial<
+        Pick<
+          ProductDefinition,
+          | 'id_tem'
+          | 'code'
+          | 'product_name'
+          | 'cost'
+          | 'shipping'
+          | 'weight'
+          | 'p_weight'
+          | 'length'
+          | 'width'
+          | 'height'
+          | 'hs_code'
+          | 'item_price'
+          | 'note1'
+          | 'note2'
+        >
+      >
     }) => {
       const { error } = await supabase.from('product_definitions').update(patch).eq('id', id)
       if (error) throw error

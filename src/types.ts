@@ -8,10 +8,20 @@ export interface Shop {
 
 export interface ProductDefinition {
   id: string
+  id_tem: string
   code: string
   product_name: string
   cost: number
   shipping: number
+  weight: number
+  p_weight: number
+  length: number
+  width: number
+  height: number
+  hs_code: string
+  item_price: number
+  note1: string
+  note2: string
   created_at: string
 }
 

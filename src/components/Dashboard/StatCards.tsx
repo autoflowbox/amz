@@ -18,10 +18,10 @@ export function StatCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {cards.map((card) => (
-        <div key={card.label} className="rounded-xl border border-white/10 bg-neutral-900 p-5">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wide">{card.label}</p>
+        <div key={card.label} className="rounded-xl border border-neutral-300 bg-white p-5">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">{card.label}</p>
           <p
-            className="mt-2 text-2xl font-semibold text-white"
+            className="mt-2 text-2xl font-semibold text-neutral-900"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {card.value}

@@ -75,17 +75,17 @@ export function SkuCell({
         title="Nhấp để sửa danh sách SKU"
       >
         {sorted.length === 0 ? (
-          <span className="text-white/25">— chưa có SKU —</span>
+          <span className="text-neutral-400">— chưa có SKU —</span>
         ) : (
           sorted.map((item) => {
             const def = findProductDefinition(item.sku, definitions)
             return (
               <div key={item.id} className="mb-1 last:mb-0">
-                <div className="text-white leading-tight">{item.sku}</div>
+                <div className="text-neutral-900 leading-tight">{item.sku}</div>
                 {def ? (
-                  <div className="text-[11px] text-white/40 leading-tight">{def.product_name}</div>
+                  <div className="text-[11px] text-neutral-500 leading-tight">{def.product_name}</div>
                 ) : (
-                  <div className="text-[11px] text-red-400 leading-tight">Chưa xác định sản phẩm</div>
+                  <div className="text-[11px] text-red-600 leading-tight">Chưa xác định sản phẩm</div>
                 )}
               </div>
             )
@@ -95,26 +95,26 @@ export function SkuCell({
 
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={() => setEditing(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-xl border border-white/10 bg-neutral-900 p-5 shadow-2xl"
+            className="w-full max-w-lg rounded-xl border border-neutral-300 bg-white p-5 shadow-xl"
           >
-            <h3 className="text-white font-medium mb-3">Thông tin đơn hàng</h3>
+            <h3 className="text-neutral-900 font-medium mb-3">Thông tin đơn hàng</h3>
 
-            <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">
               Order ID
             </label>
             <input
               value={orderIdDraft}
               onChange={(e) => setOrderIdDraft(e.target.value)}
               placeholder="Order ID"
-              className="w-full mb-3 rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+              className="w-full mb-3 rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500"
             />
 
-            <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">
               SKU
             </label>
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -131,15 +131,15 @@ export function SkuCell({
                           setRows(next)
                         }}
                         placeholder="VD: 2xMP-mpWISHpq1ELECTRICIA40830"
-                        className="w-full rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+                        className="w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500"
                       />
                       <div className="text-[11px] mt-0.5 leading-tight">
                         {row.sku.trim() === '' ? (
-                          <span className="text-white/25">&nbsp;</span>
+                          <span className="text-neutral-400">&nbsp;</span>
                         ) : def ? (
-                          <span className="text-white/40">{def.product_name}</span>
+                          <span className="text-neutral-500">{def.product_name}</span>
                         ) : (
-                          <span className="text-red-400">Chưa xác định sản phẩm</span>
+                          <span className="text-red-600">Chưa xác định sản phẩm</span>
                         )}
                       </div>
                     </div>
@@ -152,11 +152,11 @@ export function SkuCell({
                         next[i] = { ...next[i], quantity: Number(e.target.value) || 1 }
                         setRows(next)
                       }}
-                      className="w-16 rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+                      className="w-16 rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500"
                     />
                     <button
                       onClick={() => setRows(rows.filter((_, idx) => idx !== i))}
-                      className="text-white/40 hover:text-red-400 px-1.5 py-1.5"
+                      className="text-neutral-400 hover:text-red-500 px-1.5 py-1.5"
                       title="Xóa dòng"
                     >
                       ✕
@@ -168,12 +168,12 @@ export function SkuCell({
 
             <button
               onClick={() => setRows([...rows, { key: crypto.randomUUID(), sku: '', quantity: 1 }])}
-              className="mt-2 inline-flex items-center gap-1 rounded-md border border-blue-500/50 bg-blue-500/15 px-2.5 py-1 text-sm font-medium text-blue-300 hover:border-blue-500 hover:bg-blue-500/30 hover:text-white"
+              className="mt-2 inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-700 hover:border-blue-500 hover:bg-blue-100"
             >
               + Thêm SKU
             </button>
 
-            <label className="block mt-4 text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+            <label className="block mt-4 text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">
               Address
             </label>
             <textarea
@@ -181,23 +181,23 @@ export function SkuCell({
               onChange={(e) => setAddressDraft(e.target.value)}
               rows={3}
               placeholder="Địa chỉ"
-              className="w-full rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+              className="w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500"
             />
 
-            <label className="block mt-4 text-xs font-medium text-white/50 uppercase tracking-wide mb-1">
+            <label className="block mt-4 text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">
               Shipping Date
             </label>
             <input
               type="date"
               value={shippingDateDraft}
               onChange={(e) => setShippingDateDraft(e.target.value)}
-              className="w-full rounded border border-white/15 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+              className="w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500"
             />
 
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setEditing(false)}
-                className="rounded-md border border-white/15 px-3 py-1.5 text-sm text-white/70 hover:bg-white/5"
+                className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100"
               >
                 Hủy
               </button>

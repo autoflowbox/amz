@@ -13,14 +13,14 @@ export function AddressCell({
   const display = (
     <div className="whitespace-pre-line leading-snug">
       {lines.length === 0 ? (
-        <span className="text-white/25">—</span>
+        <span className="text-neutral-400">—</span>
       ) : (
         lines.map((line, i) => {
           const isHighlight = highlightCountry && line === highlightCountry
           return (
             <div key={i} className={isHighlight ? '' : undefined}>
               {isHighlight ? (
-                <span className="inline-block rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 text-xs font-semibold">
+                <span className="inline-block rounded bg-amber-100 text-amber-800 border border-amber-300 px-1.5 text-xs font-semibold">
                   {line}
                 </span>
               ) : (

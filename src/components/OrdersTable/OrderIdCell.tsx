@@ -69,7 +69,7 @@ export function OrderIdCell({
           if (e.key === 'Escape') cancel()
         }}
         placeholder="Order ID"
-        className="w-full h-full min-h-[28px] rounded border border-blue-500 bg-neutral-800 px-1.5 py-1 text-sm text-white outline-none"
+        className="w-full h-full min-h-[28px] rounded border border-blue-500 bg-white px-1.5 py-1 text-sm text-neutral-900 outline-none"
       />
     )
   }
@@ -85,9 +85,9 @@ export function OrderIdCell({
       title="Nhấp để sửa · Nhấp đúp để copy SKU"
     >
       {copied ? (
-        <span className="text-emerald-400">✓ Đã copy SKU</span>
+        <span className="text-emerald-600">✓ Đã copy SKU</span>
       ) : value === '' ? (
-        <span className="text-white/25">Order ID</span>
+        <span className="text-neutral-400">Order ID</span>
       ) : (
         value
       )}

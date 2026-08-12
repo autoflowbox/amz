@@ -49,9 +49,9 @@ export const urgencyRank: Record<ShippingUrgency, number> = {
 }
 
 export const urgencyClasses: Record<ShippingUrgency, string> = {
-  none: 'bg-white/5 text-white/50 border-white/10',
-  default: 'bg-white/10 text-white border-white/20',
-  yellow: 'bg-yellow-400/20 text-yellow-300 border-yellow-400/40',
-  orange: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
-  overdue: 'bg-red-500/20 text-red-300 border-red-500/40',
+  none: 'bg-neutral-50 text-neutral-500 border-neutral-300',
+  default: 'bg-neutral-100 text-neutral-700 border-neutral-300',
+  yellow: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  orange: 'bg-orange-100 text-orange-700 border-orange-300',
+  overdue: 'bg-red-100 text-red-700 border-red-300',
 }

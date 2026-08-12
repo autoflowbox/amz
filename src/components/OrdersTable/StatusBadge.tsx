@@ -1,20 +1,25 @@
 import type { OrderStatus } from '../../types'
 import { Dropdown } from './Dropdown'
 
+/**
+ * Progress-flow statuses (Chờ ship → Chờ in → Đã gửi → DONE) get a white→dark-green gradient so the
+ * badge color itself signals how far along an order is. 'Lưu ý' stays red (it's an attention flag,
+ * not a step) and 'Hủy đơn' stays neutral gray (cancelled isn't "further along" than DONE).
+ */
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  '': 'bg-white/5 text-white/40 border-white/15 border-dashed',
-  'Chờ ship': 'bg-white/10 text-white border-white/25',
-  'Chờ in': 'bg-purple-500/15 text-purple-300 border-purple-500/40',
-  'Đã gửi': 'bg-sky-500/15 text-sky-300 border-sky-500/40',
-  'Lưu ý': 'bg-red-500/20 text-red-300 border-red-500/50',
-  DONE: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-  'Hủy đơn': 'bg-neutral-500/20 text-neutral-400 border-neutral-500/40 line-through',
+  '': 'bg-neutral-50 text-neutral-400 border-neutral-300 border-dashed',
+  'Chờ ship': 'bg-white text-neutral-700 border-neutral-300',
+  'Chờ in': 'bg-green-100 text-green-800 border-green-300',
+  'Đã gửi': 'bg-green-300 text-green-900 border-green-400',
+  'Lưu ý': 'bg-red-100 text-red-700 border-red-300',
+  DONE: 'bg-green-700 text-white border-green-800',
+  'Hủy đơn': 'bg-neutral-200 text-neutral-500 border-neutral-300 line-through',
 }
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   '': 'Chưa có status',
-  'Chờ ship': '0 – Chờ Ship',
-  'Chờ in': '1 – Chờ in',
+  'Chờ ship': '0 – New',
+  'Chờ in': '1 – Cần in',
   'Đã gửi': '2 – Đã gửi',
   'Lưu ý': '3 – Lưu ý',
   DONE: '4 – DONE',
@@ -50,8 +55,8 @@ export function StatusBadge({
                 onChange(s)
                 close()
               }}
-              className={`w-full text-left px-3 py-1.5 text-sm whitespace-nowrap hover:bg-white/10 ${
-                s === status ? 'text-blue-400 font-medium' : 'text-white/80'
+              className={`w-full text-left px-3 py-1.5 text-sm whitespace-nowrap hover:bg-neutral-100 ${
+                s === status ? 'text-blue-600 font-medium' : 'text-neutral-700'
               }`}
             >
               {STATUS_LABELS[s]}

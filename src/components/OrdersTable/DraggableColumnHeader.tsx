@@ -23,22 +23,22 @@ export function DraggableColumnHeader({ header }: { header: Header<Order, unknow
     <th
       ref={setNodeRef}
       style={style}
-      className={`sticky top-0 z-10 border-b text-left px-1.5 py-2 select-none ${
-        isSku ? 'bg-blue-500/15 border-blue-500/30' : 'bg-neutral-900 border-white/10'
+      className={`sticky top-0 z-10 border-b-2 text-left px-1.5 py-2 select-none ${
+        isSku ? 'bg-blue-100 border-blue-300' : 'bg-neutral-50 border-neutral-300'
       }`}
     >
       <div className="flex items-center gap-1">
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-white/25 hover:text-white/60 px-0.5"
+          className="cursor-grab active:cursor-grabbing text-neutral-400 hover:text-neutral-600 px-0.5"
           title="Kéo để sắp xếp cột"
         >
           ⠿
         </button>
         <span
           className={`text-xs font-semibold uppercase tracking-wide ${
-            isSku ? 'text-blue-300' : 'text-white/60'
+            isSku ? 'text-blue-700' : 'text-neutral-600'
           }`}
         >
           {flexRender(header.column.columnDef.header, header.getContext())}

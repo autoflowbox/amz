@@ -1,9 +1,9 @@
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-const SERIES_BLUE = '#3987e5'
-const GRID = '#2c2c2a'
-const AXIS_TEXT = '#c3c2b7'
-const SURFACE = '#1a1a19'
+const SERIES_BLUE = '#2f6fd6'
+const GRID = '#e3e4e8'
+const AXIS_TEXT = '#52525b'
+const SURFACE = '#ffffff'
 
 export interface RankingDatum {
   label: string
@@ -21,7 +21,7 @@ export function RankingBarChart({
   labelWidth?: number
 }) {
   if (data.length === 0) {
-    return <p className="text-sm text-white/40 py-8 text-center">Chưa có dữ liệu.</p>
+    return <p className="text-sm text-neutral-400 py-8 text-center">Chưa có dữ liệu.</p>
   }
 
   const height = Math.max(120, data.length * 34 + 24)
@@ -40,9 +40,9 @@ export function RankingBarChart({
           tickLine={false}
         />
         <Tooltip
-          cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-          contentStyle={{ background: SURFACE, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
-          labelStyle={{ color: '#fff' }}
+          cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+          contentStyle={{ background: SURFACE, border: '1px solid #d4d4d8', borderRadius: 8 }}
+          labelStyle={{ color: '#18181b' }}
           itemStyle={{ color: AXIS_TEXT }}
           formatter={(value) => [String(value), valueLabel]}
         />

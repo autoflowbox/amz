@@ -20,7 +20,7 @@ function AuthGate() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-white/50 text-sm">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
         Đang tải...
       </div>
     )

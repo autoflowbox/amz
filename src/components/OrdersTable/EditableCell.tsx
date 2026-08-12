@@ -7,9 +7,11 @@ interface EditableCellProps {
   display?: React.ReactNode
   placeholder?: string
   className?: string
+  /** 'click' enters edit mode on a single click anywhere in the cell; 'doubleClick' (default) is the Airtable-style behavior. */
+  editTrigger?: 'click' | 'doubleClick'
 }
 
-/** Airtable-style: double-click to edit, Enter/blur to commit, Escape to cancel. */
+/** Airtable-style by default: double-click to edit, Enter/blur to commit, Escape to cancel. */
 export function EditableCell({
   value,
   onSave,
@@ -17,6 +19,7 @@ export function EditableCell({
   display,
   placeholder,
   className = '',
+  editTrigger = 'doubleClick',
 }: EditableCellProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(String(value ?? ''))
@@ -57,7 +60,7 @@ export function EditableCell({
         if (e.key === 'Escape') cancel()
       },
       className:
-        'w-full h-full min-h-[28px] rounded border border-blue-500 bg-neutral-800 px-1.5 py-1 text-sm text-white outline-none',
+        'w-full h-full min-h-[28px] rounded border border-blue-500 bg-white px-1.5 py-1 text-sm text-neutral-900 outline-none',
       placeholder,
     }
 
@@ -81,14 +84,17 @@ export function EditableCell({
     )
   }
 
+  const activate = () => setEditing(true)
+
   return (
     <div
-      onDoubleClick={() => setEditing(true)}
-      className={`w-full h-full min-h-[28px] px-1.5 py-1 text-sm cursor-text ${className}`}
-      title="Nhấp đúp để sửa"
+      onClick={editTrigger === 'click' ? activate : undefined}
+      onDoubleClick={editTrigger === 'doubleClick' ? activate : undefined}
+      className={`absolute inset-0 min-h-[28px] px-1.5 py-1 text-sm cursor-text overflow-auto ${className}`}
+      title={editTrigger === 'click' ? 'Nhấp để sửa' : 'Nhấp đúp để sửa'}
     >
       {display ?? (value === '' || value === null || value === undefined ? (
-        <span className="text-white/25">{placeholder ?? '—'}</span>
+        <span className="text-neutral-400">{placeholder ?? '—'}</span>
       ) : (
         String(value)
       ))}

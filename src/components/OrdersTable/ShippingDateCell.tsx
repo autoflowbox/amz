@@ -38,7 +38,7 @@ export function ShippingDateCell({
           if (e.target.value !== (shippingDate ?? '')) onSave(e.target.value)
         }}
         onKeyDown={(e) => e.key === 'Escape' && setEditing(false)}
-        className="w-full h-full min-h-[28px] rounded border border-blue-500 bg-neutral-800 px-1.5 py-1 text-sm text-white outline-none"
+        className="w-full h-full min-h-[28px] rounded border border-blue-500 bg-white px-1.5 py-1 text-sm text-neutral-900 outline-none"
       />
     )
   }

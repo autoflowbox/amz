@@ -26,3 +26,18 @@ export function useAddShop() {
     },
   })
 }
+
+/** Renames a shop — updates the shared `shops` row, so it's reflected everywhere that shop_id is used. */
+export function useUpdateShop() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }): Promise<Shop> => {
+      const { data, error } = await supabase.from('shops').update({ name }).eq('id', id).select().single()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shops'] })
+    },
+  })
+}

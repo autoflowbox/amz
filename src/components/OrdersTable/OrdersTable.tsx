@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import {
   type ColumnDef,
   type VisibilityState,
@@ -66,15 +66,15 @@ const COLUMN_LABELS: Record<string, string> = {
   shop: 'Shop',
   order_id: 'Order ID',
   sku: 'SKU',
-  quantity: 'Quantity',
+  quantity: 'Qty',
   address: 'Address',
   note: 'Note',
-  price: 'Giá bán',
+  price: 'Giá',
   profit: 'Profit',
-  shipping_date: 'Shipping Date',
+  shipping_date: 'Ship Date',
   file_attached: 'File attached',
   status: 'Status',
-  assignee: 'Người làm đơn',
+  assignee: 'Team',
   print: 'Print',
 }
 
@@ -246,7 +246,7 @@ export function OrdersTable() {
       {
         id: 'quantity',
         header: COLUMN_LABELS.quantity,
-        size: 40,
+        size: 28,
         cell: ({ row }) => <QuantityCell items={row.original.order_items ?? []} />,
       },
       {
@@ -272,12 +272,14 @@ export function OrdersTable() {
             }
             type="textarea"
             placeholder="Ghi chú"
+            editTrigger="click"
           />
         ),
       },
       {
         id: 'price',
         header: COLUMN_LABELS.price,
+        size: 64,
         cell: ({ row }) => (
           <EditableCell
             value={row.original.price}
@@ -388,9 +390,11 @@ export function OrdersTable() {
     persistColumnOrder(arrayMove(columnOrder, oldIndex, newIndex))
   }
 
+  const tableRows = table.getRowModel().rows
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-3 px-6 py-3 border-b border-white/10 flex-wrap">
+    <div className="flex flex-col h-full bg-white">
+      <div className="flex items-center justify-between gap-3 px-6 py-3 border-b border-neutral-300 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => createOrder.mutate()}
@@ -406,12 +410,12 @@ export function OrdersTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm đơn hàng (Order ID, SKU, địa chỉ, ghi chú, người làm đơn)..."
-              className="rounded-md border border-white/15 bg-neutral-900 pl-2.5 pr-7 py-1.5 text-sm text-white outline-none placeholder:text-white/30 w-72"
+              className="rounded-md border border-neutral-300 bg-white pl-2.5 pr-7 py-1.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 w-72"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white text-sm"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 text-sm"
                 title="Xóa tìm kiếm"
               >
                 ×
@@ -422,7 +426,7 @@ export function OrdersTable() {
           <select
             value={shopFilter}
             onChange={(e) => setShopFilter(e.target.value)}
-            className="rounded-md border border-white/15 bg-neutral-900 px-2.5 py-1.5 text-sm text-white outline-none"
+            className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm text-neutral-900 outline-none"
           >
             <option value="all">Tất cả shop</option>
             {shops.map((s) => (
@@ -435,7 +439,7 @@ export function OrdersTable() {
           <select
             value={shipDateFilter}
             onChange={(e) => setShipDateFilter(e.target.value as ShipDateFilter)}
-            className="rounded-md border border-white/15 bg-neutral-900 px-2.5 py-1.5 text-sm text-white outline-none"
+            className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm text-neutral-900 outline-none"
             title="Lọc theo ship date — quá hạn luôn được xếp lên đầu bảng"
           >
             {(Object.keys(SHIP_DATE_FILTER_LABELS) as ShipDateFilter[]).map((key) => (
@@ -446,7 +450,7 @@ export function OrdersTable() {
           </select>
 
           <label
-            className="flex items-center gap-1.5 text-sm text-white/70 px-1"
+            className="flex items-center gap-1.5 text-sm text-neutral-600 px-1"
             title="Mặc định ẩn các đơn ở trạng thái DONE và Hủy đơn"
           >
             <input
@@ -459,7 +463,7 @@ export function OrdersTable() {
 
           <button
             onClick={() => setShowDefsModal(true)}
-            className="text-sm text-white/70 hover:text-white border border-white/15 rounded-md px-3 py-1.5 hover:bg-white/5"
+            className="text-sm text-neutral-600 hover:text-neutral-900 border border-neutral-300 rounded-md px-3 py-1.5 hover:bg-neutral-100"
           >
             Thư viện SKU
           </button>
@@ -475,70 +479,81 @@ export function OrdersTable() {
       <div
         className={`px-6 py-2.5 border-b text-sm font-medium ${
           pendingCount > 0
-            ? 'border-blue-400/40 bg-blue-500/25 text-blue-100 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.3)]'
-            : 'border-white/10 bg-blue-500/10 text-blue-200'
+            ? 'border-blue-300 bg-blue-100 text-blue-900'
+            : 'border-neutral-200 bg-blue-50 text-blue-700'
         }`}
       >
-        Bạn có <span className="font-bold text-base text-white">{pendingCount}</span> đơn hàng chờ xử lý (số đơn hàng chờ ship)
+        Bạn có <span className="font-bold text-base text-neutral-900">{pendingCount}</span> đơn hàng chờ xử lý (số đơn hàng chờ ship)
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-white">
         {isLoading ? (
-          <p className="p-6 text-white/50 text-sm">Đang tải...</p>
+          <p className="p-6 text-neutral-500 text-sm">Đang tải...</p>
         ) : (
           <table className="min-w-full border-collapse">
             <thead>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <tr>
-                  <th className="sticky top-0 z-10 bg-neutral-900 border-b border-white/10 text-left px-1.5 py-2 w-12">
-                    <span className="text-xs font-semibold text-white/60 uppercase tracking-wide">STT</span>
+                  <th className="sticky top-0 z-10 bg-neutral-50 border-b-2 border-neutral-300 text-left px-1.5 py-2 w-12">
+                    <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">STT</span>
                   </th>
                   <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                     {table.getHeaderGroups()[0].headers.map((header) => (
                       <DraggableColumnHeader key={header.id} header={header} />
                     ))}
                   </SortableContext>
-                  <th className="sticky top-0 z-10 bg-neutral-900 border-b border-white/10 text-left px-1.5 py-2 w-10" />
+                  <th className="sticky top-0 z-10 bg-neutral-50 border-b-2 border-neutral-300 text-left px-1.5 py-2 w-10" />
                 </tr>
               </DndContext>
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row, index) => (
-                <tr
-                  key={row.id}
-                  className={`border-b border-white/5 align-top hover:bg-white/[0.03] ${
-                    row.original.status === 'Lưu ý' ? 'bg-red-500/[0.06]' : ''
-                  }`}
-                >
-                  <td className="px-1.5 py-1 text-sm text-white/40 align-top">{index + 1}</td>
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={`align-top border-l ${
-                        cell.column.id === 'sku'
-                          ? 'bg-blue-500/[0.06] border-blue-500/20'
-                          : 'border-white/5'
+              {tableRows.map((row, index) => {
+                const showGroupGap = index > 0 && tableRows[index - 1].original.status !== row.original.status
+                return (
+                  <Fragment key={row.id}>
+                    {showGroupGap && (
+                      <tr aria-hidden="true">
+                        <td colSpan={columns.length + 2} className="h-8 bg-neutral-100 p-0 border-0 relative">
+                          <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 border-t-2 border-neutral-300" />
+                        </td>
+                      </tr>
+                    )}
+                    <tr
+                      className={`border-b border-neutral-300 align-top hover:bg-neutral-50 ${
+                        row.original.status === 'Lưu ý' ? 'bg-red-50' : ''
                       }`}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                  <td className="px-1.5 py-1 align-top">
-                    <button
-                      onClick={() => {
-                        if (confirm('Xóa đơn hàng này?')) deleteOrder.mutate(row.original.id)
-                      }}
-                      className="text-white/30 hover:text-red-400 text-sm"
-                      title="Xóa đơn"
-                    >
-                      🗑
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <td className="px-1.5 py-1 text-sm text-neutral-400 align-top border-r border-neutral-300">{index + 1}</td>
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className={`relative align-top border-r ${
+                            cell.column.id === 'sku'
+                              ? 'bg-blue-100 border-blue-200'
+                              : 'border-neutral-300'
+                          }`}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                      <td className="px-1.5 py-1 align-top">
+                        <button
+                          onClick={() => {
+                            if (confirm('Xóa đơn hàng này?')) deleteOrder.mutate(row.original.id)
+                          }}
+                          className="text-neutral-400 hover:text-red-600 text-sm"
+                          title="Xóa đơn"
+                        >
+                          🗑
+                        </button>
+                      </td>
+                    </tr>
+                  </Fragment>
+                )
+              })}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan={columns.length + 2} className="text-center text-white/40 text-sm py-10">
+                  <td colSpan={columns.length + 2} className="text-center text-neutral-500 text-sm py-10">
                     {search.trim() ? 'Không tìm thấy đơn hàng nào khớp với tìm kiếm.' : 'Chưa có đơn hàng nào.'}
                   </td>
                 </tr>
@@ -548,7 +563,7 @@ export function OrdersTable() {
                   <button
                     onClick={() => createOrder.mutate()}
                     disabled={createOrder.isPending}
-                    className="flex items-center justify-center w-6 h-6 rounded-md border border-blue-500/50 bg-blue-500/15 text-blue-300 hover:text-white hover:border-blue-500 hover:bg-blue-500/30 disabled:opacity-50 text-sm font-bold shadow-[0_0_0_1px_rgba(59,130,246,0.15)]"
+                    className="flex items-center justify-center w-6 h-6 rounded-md border border-blue-300 bg-blue-50 text-blue-600 hover:text-white hover:border-blue-500 hover:bg-blue-500 disabled:opacity-50 text-sm font-bold"
                     title="Thêm đơn hàng mới"
                   >
                     +

@@ -11,7 +11,7 @@ export function ProfitCell({
   definitions: ProductDefinition[]
 }) {
   const profit = computeProfit(price, items, definitions)
-  const color = profit >= 0 ? 'text-emerald-400' : 'text-red-400'
+  const color = profit >= 0 ? 'text-emerald-600' : 'text-red-600'
 
   return (
     <div className={`w-full h-full min-h-[28px] px-1 py-1 text-xs font-medium whitespace-nowrap ${color}`}>

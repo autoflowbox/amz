@@ -46,7 +46,7 @@ export function Dropdown({
       </button>
       {open && (
         <div
-          className={`absolute z-50 mt-1 min-w-[180px] max-h-64 overflow-y-auto rounded-md border border-white/10 bg-neutral-900 shadow-xl ${
+          className={`absolute z-50 mt-1 min-w-[180px] max-h-64 overflow-y-auto rounded-md border border-neutral-300 bg-white shadow-lg ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >

@@ -22,15 +22,15 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100 px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-xl border border-white/10 bg-neutral-900 p-8 shadow-xl"
+        className="w-full max-w-sm rounded-xl border border-neutral-300 bg-white p-8 shadow-sm"
       >
-        <h1 className="text-xl font-semibold text-white mb-1">Amazon Order Management</h1>
-        <p className="text-sm text-white/50 mb-6">Đăng nhập để tiếp tục</p>
+        <h1 className="text-xl font-semibold text-neutral-900 mb-1">Amazon Order Management</h1>
+        <p className="text-sm text-neutral-500 mb-6">Đăng nhập để tiếp tục</p>
 
-        <label className="block text-sm text-white/70 mb-1" htmlFor="email">
+        <label className="block text-sm text-neutral-700 mb-1" htmlFor="email">
           Email
         </label>
         <input
@@ -40,10 +40,10 @@ export function LoginPage() {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 rounded-md border border-white/15 bg-neutral-800 px-3 py-2 text-white outline-none focus:border-blue-500"
+          className="w-full mb-4 rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-blue-500"
         />
 
-        <label className="block text-sm text-white/70 mb-1" htmlFor="password">
+        <label className="block text-sm text-neutral-700 mb-1" htmlFor="password">
           Mật khẩu
         </label>
         <input
@@ -53,11 +53,11 @@ export function LoginPage() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-6 rounded-md border border-white/15 bg-neutral-800 px-3 py-2 text-white outline-none focus:border-blue-500"
+          className="w-full mb-6 rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-blue-500"
         />
 
         {error && (
-          <p className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2">
+          <p className="mb-4 text-sm text-red-700 bg-red-50 border border-red-300 rounded-md px-3 py-2">
             {error}
           </p>
         )}
@@ -70,7 +70,7 @@ export function LoginPage() {
           {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
 
-        <p className="mt-4 text-xs text-white/40">
+        <p className="mt-4 text-xs text-neutral-400">
           Chưa có tài khoản? Liên hệ admin để được tạo trong Supabase Dashboard.
         </p>
       </form>

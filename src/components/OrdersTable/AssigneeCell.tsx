@@ -23,9 +23,9 @@ export function AssigneeCell({
       trigger={() => (
         <div className="w-full h-full min-h-[28px] px-1.5 py-1 text-sm cursor-pointer flex items-center">
           {value.trim() === '' ? (
-            <span className="text-white/25">Người làm đơn</span>
+            <span className="text-neutral-400">Team</span>
           ) : (
-            <span className="text-white">{value}</span>
+            <span className="text-neutral-900">{value}</span>
           )}
         </div>
       )}
@@ -33,7 +33,7 @@ export function AssigneeCell({
       {(close) => (
         <div className="py-1">
           {options.length === 0 && (
-            <div className="px-3 py-1.5 text-xs text-white/30">Chưa có ai trong danh sách</div>
+            <div className="px-3 py-1.5 text-xs text-neutral-400">Chưa có ai trong danh sách</div>
           )}
           {options.map((name) => (
             <button
@@ -43,15 +43,15 @@ export function AssigneeCell({
                 onChange(name)
                 close()
               }}
-              className={`w-full text-left px-3 py-1.5 text-sm whitespace-nowrap hover:bg-white/10 ${
-                name === value ? 'text-blue-400 font-medium' : 'text-white/80'
+              className={`w-full text-left px-3 py-1.5 text-sm whitespace-nowrap hover:bg-neutral-100 ${
+                name === value ? 'text-blue-600 font-medium' : 'text-neutral-700'
               }`}
             >
               {name}
             </button>
           ))}
 
-          <div className="border-t border-white/10 mt-1 pt-1 px-2">
+          <div className="border-t border-neutral-200 mt-1 pt-1 px-2">
             {adding ? (
               <form
                 className="flex gap-1"
@@ -72,14 +72,14 @@ export function AssigneeCell({
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Escape' && setAdding(false)}
                   placeholder="Tên người làm đơn mới"
-                  className="w-full rounded border border-blue-500 bg-neutral-800 px-2 py-1 text-sm text-white outline-none"
+                  className="w-full rounded border border-blue-500 bg-white px-2 py-1 text-sm text-neutral-900 outline-none"
                 />
               </form>
             ) : (
               <button
                 type="button"
                 onClick={() => setAdding(true)}
-                className="w-full text-left px-1 py-1.5 text-sm text-blue-400 hover:text-blue-300"
+                className="w-full text-left px-1 py-1.5 text-sm text-blue-600 hover:text-blue-500"
               >
                 + Thêm người mới
               </button>

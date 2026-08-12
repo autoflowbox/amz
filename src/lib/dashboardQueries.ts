@@ -18,6 +18,13 @@ export interface ShopRanking {
   orderCount: number
 }
 
+export interface AssigneeStat {
+  assigneeName: string
+  orderCount: number
+  revenue: number
+  profit: number
+}
+
 export interface DashboardStats {
   topSkus: SkuRanking[]
   topProductTypes: ProductTypeRanking[]
@@ -25,6 +32,7 @@ export interface DashboardStats {
   revenue: number
   profit: number
   shopRankings: ShopRanking[]
+  assigneeStats: AssigneeStat[]
 }
 
 export interface DashboardFilters {
@@ -33,6 +41,8 @@ export interface DashboardFilters {
   to: string | null
   /** Null means every shop; otherwise restrict to this shop id. */
   shopId: string | null
+  /** Null means every assignee; otherwise restrict to orders made by this person. */
+  assignee: string | null
 }
 
 /** First day of the current calendar month, as "YYYY-MM-DD". */
@@ -48,6 +58,7 @@ export function getTodayStr(): string {
 
 function orderMatchesFilters(order: Order, filters: DashboardFilters): boolean {
   if (filters.shopId && order.shop_id !== filters.shopId) return false
+  if (filters.assignee && order.assignee.trim() !== filters.assignee) return false
   const orderDate = order.created_at.slice(0, 10)
   if (filters.from && orderDate < filters.from) return false
   if (filters.to && orderDate > filters.to) return false
@@ -63,6 +74,7 @@ export function computeDashboardStats(
   const skuTotals = new Map<string, { productName: string; quantity: number }>()
   const productTypeTotals = new Map<string, number>()
   const shopOrderCounts = new Map<string, number>()
+  const assigneeTotals = new Map<string, { orderCount: number; revenue: number; profit: number }>()
 
   let orderCount = 0
   let revenue = 0
@@ -73,6 +85,15 @@ export function computeDashboardStats(
 
     const shopName = shops.find((s) => s.id === order.shop_id)?.name ?? 'Không rõ shop'
     shopOrderCounts.set(shopName, (shopOrderCounts.get(shopName) ?? 0) + 1)
+
+    const assigneeName = order.assignee.trim() || 'Chưa gán'
+    const orderProfit = computeProfit(order.price, order.order_items, definitions)
+    const assigneeExisting = assigneeTotals.get(assigneeName)
+    assigneeTotals.set(assigneeName, {
+      orderCount: (assigneeExisting?.orderCount ?? 0) + 1,
+      revenue: (assigneeExisting?.revenue ?? 0) + (order.price || 0),
+      profit: (assigneeExisting?.profit ?? 0) + orderProfit,
+    })
 
     for (const item of order.order_items ?? []) {
       const def = findProductDefinition(item.sku, definitions)
@@ -92,7 +113,7 @@ export function computeDashboardStats(
 
     orderCount += 1
     revenue += order.price || 0
-    profit += computeProfit(order.price, order.order_items, definitions)
+    profit += orderProfit
   }
 
   const topSkus: SkuRanking[] = [...skuTotals.entries()]
@@ -107,6 +128,10 @@ export function computeDashboardStats(
     .map(([shopName, orderCount]) => ({ shopName, orderCount }))
     .sort((a, b) => b.orderCount - a.orderCount)
 
+  const assigneeStats: AssigneeStat[] = [...assigneeTotals.entries()]
+    .map(([assigneeName, v]) => ({ assigneeName, ...v }))
+    .sort((a, b) => b.orderCount - a.orderCount)
+
   return {
     topSkus,
     topProductTypes,
@@ -114,5 +139,6 @@ export function computeDashboardStats(
     revenue,
     profit,
     shopRankings,
+    assigneeStats,
   }
 }
